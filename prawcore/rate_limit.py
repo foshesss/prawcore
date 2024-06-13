@@ -70,6 +70,16 @@ class RateLimiter:
         should trigger exceptions that indicate invalid behavior.
 
         """
+        # fix for malformed x-ratelimit. source: https://www.reddit.com/r/ModSupport/comments/18hq3st/xratelimitremaining_api_header_is_returning_a/
+        if "x-ratelimit-used" not in response_headers:
+            response_headers["x-ratelimit-used"] = "300"
+        if "x-ratelimit-remaining" not in response_headers:
+            response_headers["x-ratelimit-remaining"] = "300"
+        if "," in response_headers["x-ratelimit-remaining"]:
+            response_headers["x-ratelimit-remaining"] = response_headers["x-ratelimit-remaining"].split(",")[0]
+        if "," in response_headers["x-ratelimit-used"]:
+            response_headers["x-ratelimit-used"] = response_headers["x-ratelimit-used"].split(",")[0]
+
         if "x-ratelimit-remaining" not in response_headers:
             if self.remaining is not None:
                 self.remaining -= 1
